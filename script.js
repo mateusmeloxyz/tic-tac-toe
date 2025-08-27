@@ -1,14 +1,14 @@
 function Cell() {
   let value = 0;
 
-  const markSpot = (player) => {
+  const addToken = (player) => {
     value = player;
   };
 
   const getValue = () => value;
 
   return {
-    markSpot,
+    addToken,
     getValue,
   };
 }
@@ -32,7 +32,7 @@ function Gameboard() {
 
     if (playerToken !== 1 && playerToken !== -1) return "Invalid playerToken";
 
-    board[posX][posY].markSpot(playerToken);
+    board[posX][posY].addToken(playerToken);
     return `Cell (${posX},${posY}) marked with playerToken ${
       playerToken === 1 ? "X" : "o"
     }`;
@@ -55,17 +55,56 @@ function Gameboard() {
   return { getBoard, markSpot, printBoard };
 }
 
-const board = Gameboard();
+function GameController(
+  playerOneName = "Player One",
+  playerTwoName = "Player Two",
+) {
+  const board = Gameboard();
 
-console.table(board.getBoard());
+  const players = [
+    {
+      name: playerOneName,
+      token: 1,
+    },
+    {
+      name: playerTwoName,
+      token: -1,
+    },
+  ];
 
-board.printBoard();
-console.log(board.markSpot(2, 2, 1));
-board.printBoard();
-console.log(board.markSpot(2, 2, 1));
-board.printBoard();
-console.log(board.markSpot(2, 2, -1));
-board.printBoard();
-console.log(board.markSpot(1, 1, -1));
-board.printBoard();
-console.log(board.markSpot(1, 0, 10));
+  let activePlayer = players[0];
+
+  const switchPlayerTurn = () => {
+    activePlayer = activePlayer === players[0] ? players[1] : players[0];
+  };
+
+  const getActivePlayer = () => activePlayer;
+
+  const printNewRound = () => {
+    board.printBoard();
+    console.log(`${getActivePlayer().name}'s turn.`);
+  };
+
+  const playRound = (posX, posY) => {
+    console.log(
+      `Marking ${getActivePlayer().name}'s token into ${posX}, ${posY} spot...`,
+    );
+
+    board.markSpot(posX, posY, getActivePlayer().token);
+
+    /* check for winner logic goes here */
+
+    switchPlayerTurn();
+    printNewRound();
+  };
+
+  // Initial play game message
+  printNewRound();
+
+  return {
+    playRound,
+    getActivePlayer,
+  };
+}
+
+const game = GameController();
