@@ -27,15 +27,22 @@ function Gameboard() {
 
   const markSpot = (posX, posY, playerToken) => {
     if (board[posX][posY].getValue() !== 0) {
-      return "Cell already marked or invalid";
+      console.log("Cell already marked or invalid");
+      return false;
     }
 
-    if (playerToken !== 1 && playerToken !== -1) return "Invalid playerToken";
+    if (playerToken !== 1 && playerToken !== -1) {
+      console.log("Invalid playerToken");
+      return false;
+    }
 
     board[posX][posY].addToken(playerToken);
-    return `Cell (${posX},${posY}) marked with playerToken ${
-      playerToken === 1 ? "X" : "o"
-    }`;
+    console.log(
+      `Cell (${posX},${posY}) marked with playerToken ${
+        playerToken === 1 ? "X" : "o"
+      }`,
+    );
+    return true;
   };
 
   const printBoard = () => {
@@ -90,8 +97,11 @@ function GameController(
       `Marking ${getActivePlayer().name}'s token into ${posX}, ${posY} spot...`,
     );
 
-    board.markSpot(posX, posY, getActivePlayer().token);
-
+    if (board.markSpot(posX, posY, getActivePlayer().token) === false) {
+      console.log("Invalid move!");
+      printNewRound();
+      return false;
+    }
     /* check for winner logic goes here */
 
     switchPlayerTurn();
