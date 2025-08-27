@@ -59,7 +59,16 @@ function Gameboard() {
     );
   };
 
-  return { getBoard, markSpot, printBoard };
+  const clearBoard = () => {
+    for (let i = 0; i < size; i++) {
+      board[i] = [];
+      for (let j = 0; j < size; j++) {
+        board[i][j].addToken(0);
+      }
+    }
+  }
+
+  return { getBoard, markSpot, printBoard, clearBoard };
 }
 
 function GameController(
@@ -72,10 +81,12 @@ function GameController(
     {
       name: playerOneName,
       token: 1,
+      wins: 0,
     },
     {
       name: playerTwoName,
       token: -1,
+      wins: 0,
     },
   ];
 
@@ -92,6 +103,33 @@ function GameController(
     console.log(`${getActivePlayer().name}'s turn.`);
   };
 
+  const clearBoard = () => {
+    board.clearBoard();
+  }
+
+  const checkWinner = () => {
+    const n = board.length;
+    let principalDiagonalSum = 0;
+    let secondaryDiagonalSum = 0;
+    let activePlayerSum = activePlayer.getValue()*n;
+
+    for( let i = 0 ; i < n ; i++ ){
+      principalDiagonalSum += board[i][i].getValue();
+      secondaryDiagonalSum += board[i][n - 1 - i].getValue();
+    }
+
+    if(principalDiagonalSum === activePlayerSum || secondaryDiagonalSum === activePlayer){
+      printNewRound();
+      activePlayer.wins++;
+      console.log(`${activePlayer.name} wins!`);
+      clearBoard();
+      switchPlayerTurn();
+      return true;
+    }
+
+    return false;
+  }
+
   const playRound = (posX, posY) => {
     console.log(
       `Marking ${getActivePlayer().name}'s token into ${posX}, ${posY} spot...`,
@@ -103,6 +141,7 @@ function GameController(
       return false;
     }
     /* check for winner logic goes here */
+    if(checkWinner()) return true;
 
     switchPlayerTurn();
     printNewRound();
